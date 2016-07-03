@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pymcz by fedhere</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Pymcz</h1>
+        <p>montecarlo sampling method to calculate metalicity from flux data</p>
+
+        <p class="view"><a href="https://github.com/fedhere/pyMCZ">View the Project on GitHub <small>fedhere/pyMCZ</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/fedhere/pyMCZ/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/fedhere/pyMCZ/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/fedhere/pyMCZ">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="http://dx.doi.org/10.5281/zenodo.17880"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.17880.svg" alt="DOI"></a> <a href="https://landscape.io/github/fedhere/pyMCZ/master"><img src="https://landscape.io/github/fedhere/pyMCZ/master/landscape.svg?style=flat" alt="Code Health"></a></p>
+
+<h1>
+<a id="mc-metallicity" class="anchor" href="#mc-metallicity" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MC Metallicity</h1>
+
+<p>This code allows the user to calculate metallicity according to a number of <i> strong line metallicity diagnostics </i> from spectroscopy line measurements, and obtain uncertainties from the line flux errors in a Monte Carlo framework. If you use this code, <b> please cite our <a href="http://www.sciencedirect.com/science/article/pii/S2213133716300178">paper</a> which is published in <a href="http://www.journals.elsevier.com/astronomy-and-computing/">Astronomy and Computing</a> and also available on the <a href="http://arxiv.org/abs/1505.06213">arxiv</a>.</b></p>
+
+<pre><code>@ARTICLE{2016A&amp;C....16...54B,
+   author = {{Bianco}, F.~B. and {Modjaz}, M. and {Oh}, S.~M. and {Fierroz}, D. and 
+    {Liu}, Y.~Q. and {Kewley}, L. and {Graur}, O.},
+    title = "{Monte Carlo method for calculating oxygen abundances and their uncertainties from strong-line flux measurements}",
+  journal = {Astronomy and Computing},
+archivePrefix = "arXiv",
+  eprint = {1505.06213},
+primaryClass = "astro-ph.IM",
+keywords = {Galaxy, Abundances-ISM, HII regions-supernovae, General},
+     year = 2016,
+    month = jul,
+  volume = 16,
+    pages = {54-66},
+      doi = {10.1016/j.ascom.2016.03.002},
+  adsurl = {http://adsabs.harvard.edu/abs/2016A%26C....16...54B},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+</code></pre>
+
+<p>This code is released under MIT licence: see LICENSE.txt</p>
+
+<p><b>Most recent stable release: v1.3</b></p>
+
+<h1></h1>
+
+<h1>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage:</h1>
+
+<p>This code requires ascii input files, their format is described below and examples are provided in the &lt;input&gt; directory in this package.  We provide an example dataset names 'exampledata', i.e. we provide input files 'exampledata_meas.txt' and 'exampledata_err.txt' are the input files. </p>
+
+<p>From the commandline simply use as:</p>
+
+<pre><code>python mcz.py &lt;filename&gt; nsample --path PATH 
+</code></pre>
+
+<p><b>&lt;filename&gt;</b>: &lt;filename&gt; is the root name for the input as well as for all the output files: it could be for example the name of the supernova at the location of which HII regions have been measured (&lt;filename&gt; is 'exampledata' in our examples)</p>
+
+<p><b>nsample</b>: the number of MC samples desired (for exampledata 2000 is an appropriate sample size. 
+                       nsample must be &gt;100 or it can be 0 to produce a single value, and no confidence region </p>
+
+<p>additional command line arguments</p>
+
+<p><b> --path PATH  </b>         the directory in which subdirectory "input" is located. If not provided, will default
+                        environmental variable MCMetdata that should be set to point to that directory. 
+                        In our example the input directory is in pyMCZ (level 1).
+                        _err.txt _meas.txt must live in &lt;path&gt;/input</p>
+
+<p><b> --md MD      </b>         metallicity scales to calculate. default is 'all',
+                        options are: D02, Z94, M91, M08, P05,P10, PP04, M13, D13, KD02,
+                        KD02comb, DP00 (deprecated), P01 (deprecated), C01 (deprecated)</p>
+
+<p><b>  --unpickle    </b>        if it exists, a pickle file generated in a previous run for this &lt;filename&gt; and this 
+                        number of samples is read in instead of recalculating the metalicity</p>
+
+<p><b>  --binmode  BM  </b>         how to choose the number of bins for plotting the histogram:
+                            'd' is based on Doane's formula (wikipedia's version),<br>
+                            's' is the sqrt of number of data,<br>
+                            't' is on 2<em>n</em>*1/3 , 
+                            'kb' uses Knuth's block rule (default), 
+                            'bb' uses bayesian blocks (must have astroML installed or it defaults to 'kb')
+                            'kd' is the kernel density, which requires sklearn installed and additioinally plots the                             histogram with 'kb' mode</p>
+
+<p><b>  --clobber   </b>          If set to true, will overwrite existing output files without asking. Default False.</p>
+
+<p><b>  --verbose   </b>          verbose mode. Default False.</p>
+
+<p><b>  --nodust    </b>          don't do dust corrections (default is to do it)</p>
+
+<p><b>  --noplot    </b>          don't plot individual distributions (default is to
+                        plot all distributions)</p>
+
+<p><b>  --asciiout   </b>         write distribution medians and 68% inclusion regions in an ascii output (default is not
+                        to)</p>
+
+<p><b>  --asciidistrib  </b>       write the entire distribution for every scale in an ascii file output (default is not to)</p>
+
+<p><b>  --multiproc (--multi)  </b>         multiprocess, with number of threads nps=max(available cores-1, MAXPROCESSES)</p>
+
+<p><b>  --log LOGFILE  </b>       outputting messages to a log file instead of standard output. disabled when multiprocessing</p>
+
+<h1></h1>
+
+<h1>
+<a id="input-file-format" class="anchor" href="#input-file-format" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Input file format</h1>
+
+<p>Flux data for each object should be stored in the directory &lt;input&gt; that exists in the directory provided by the --path arg or by the environmental variable MCMetdata. Their ascii file names are expected to end by "_meas.txt" for the file containing the measurements, and "_err.txt" for the error file.</p>
+
+<p>with common filename &lt;filename&gt;:</p>
+
+<p>&lt;filename&gt;_err.txt</p>
+
+<p>&lt;filename&gt;_meas.txt </p>
+
+<p>The format for each of the txt files should be as follows, e.g.,</p>
+
+<p>;# galnum,[OII]3727,Hb,[OIII]4959,[OIII]5007,[OI]6300,Ha,[NII]6584,[SII]6717,[SII]6731,[SIII]9069,[SIII]9532
+       1     0.0     0.0     0.0     0.0     0.0   5.117   0.998     0.0     0.0     0.0     0.0
+       2     0.0     0.0     0.0     0.0     0.0   5.031   1.012     0.0     0.0     0.0     0.0</p>
+
+<p>galnum is a sequential index</p>
+
+<p>The first row is optional - it can contain more keys than columns, as long as the columns are listed in the same order as specified above, up to whichever line is of interest. Missing data should be filled in with 'NaN's.</p>
+
+<p>The data should be in the above order, separated by any number of white spaces.</p>
+
+<h1></h1>
+
+<h1>
+<a id="output" class="anchor" href="#output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output</h1>
+
+<p>All the results will be saved in the directory "output/&lt;filename&gt;" which will be creates in the directory provided by the --path arg.</p>
+
+<p>Read our <a href="http://www.sciencedirect.com/science/article/pii/S2213133716300178">paper</a>, or the README.md file in the output directory in this package <a href="https://github.com/nyusngroup/pyMCZ/blob/master/output/README.md">https://github.com/nyusngroup/pyMCZ/blob/master/output/README.md</a> for more details on the output products.</p>
+
+<h1></h1>
+
+<h1>
+<a id="tests-implemented" class="anchor" href="#tests-implemented" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests implemented</h1>
+
+<p>A few tests are implemented to make sure your inputs are valid, and your outputs are robust. 
+In order to assess if the number of samples requested is sufficiently large, we provide the module testcompleteness.py. </p>
+
+<p>Use as, for example: </p>
+
+<p>import testcompleteness as tc</p>
+
+<p>tc.fitdistrib(&lt;path to pickle file&gt;)</p>
+
+<p>This reads in the pickle file generated by the code, and compares the cumulative distributions for 4 parameters: E(B-V), D02, Z94 and KD02comb_updated (the user can choose to use whichever scale of course!) (choosing subsets with minimal invalid outpus for each subset).  </p>
+
+<p>The cumulative distribution for 1/10, 1/4, 1/2, 3/4 and the full sample generated by the code are compared with a KS tests and plotted. </p>
+
+<p>If the number of samples is sufficient, you should expect the probability of the 3/4 sample and full sample to come from the same parent distribution to be close to 1, and generally the KD p-value to increase with the sample fraction (but not always it turns out...). More importantly though this can be used visually: the cumulative distribution should be nearly identical (and smooth). If all distributions overlap, then you are sure that you are well above the critical sample size that achieves smoothness (by a factor 10).</p>
+
+<p>The figures below show an undersampled realization and a well- (possibly) over-sampled realization.</p>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/exampledata_n200_testcomplete.png" alt="alt tag"></p>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/exampledata_n2000_testcomplete.png" alt="alt tag"></p>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/exampledata_n20000_testcomplete.png" alt="alt tag"></p>
+
+<h1></h1>
+
+<h1>
+<a id="known-issues-and-todo" class="anchor" href="#known-issues-and-todo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Known Issues and TODO</h1>
+
+<p>Plot formatting is designed for a platform using latex and with Times New Roman serif font available to matplotlib. The module pylabsetup loaded early on assures that the matplotlib rcparameters are set up appropriately, including font choice, and in case of missing fonts an error message is streamed (but not paused upon). If your plots don't look good, change the necessary parameters in pylabsetup.py. This is an unfortunately common occurrence when not running on a Mac.</p>
+
+<p>Note that while a PDF version of our paper is included in the repository, the PDF does not render properly in github. To see the paper please go to the arxiv link (<a href="http://arxiv.org/abs/1505.06213">http://arxiv.org/abs/1505.06213</a>) or compile it with pdflatex in the repo "paper" directory on your local machine.</p>
+
+<p>The input file is a but awkward, for historical reasons: we decided to make minimal modification tot he input files required by the original IDL code. An alternative, more pythonic input, may be made available in the future, when we have time.</p>
+
+<p>It would be great to create sphyinx documentation.</p>
+
+<h1></h1>
+
+<h1>
+<a id="packages-required" class="anchor" href="#packages-required" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Packages required</h1>
+
+<p>required packages:</p>
+
+<p>numpy,pylab,matplotlib,scipy</p>
+
+<p>desirable packages:</p>
+
+<p>pickle,multiprocessing,itertools,csv,cProfile,pyqz</p>
+
+<h1></h1>
+
+<h1>
+<a id="some-figures-from-the-paper-as-examples-of-code-products" class="anchor" href="#some-figures-from-the-paper-as-examples-of-code-products" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Some figures from the paper as examples of code products</h1>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/pyMCZ_KD02distrib.png" alt="alt tag"></p>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/pyMCZ_KD02distrib_KDE.png" alt="alt tag"></p>
+
+<p><img src="https://github.com/nyusngroup/pyMCZ/blob/master/figures/pyMCZ_boxplot.png" alt="alt tag"></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/fedhere">fedhere</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
